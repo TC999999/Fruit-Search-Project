@@ -1,6 +1,8 @@
+const body = document.querySelector("body");
 const input = document.querySelector("#fruit");
 const suggestions = document.querySelector(".suggestions ul");
 const box = document.querySelector(".suggestions");
+const error = document.querySelector(".search-error");
 
 const fruit = [
   "Apple",
@@ -93,7 +95,7 @@ function search(str) {
   return results;
 }
 
-function searchHandler(e) {
+function searchHandler() {
   suggestions.innerHTML = "";
   let inputVal = input.value;
   let results = search(inputVal);
@@ -102,18 +104,26 @@ function searchHandler(e) {
 
 function showSuggestions(results, inputVal) {
   if (inputVal !== "") {
-    results.forEach((fruit) => {
-      let newFruit = document.createElement("li");
-      suggestions.appendChild(newFruit);
-      newFruit.innerText = fruit;
-    });
-    if (results.length > 7) {
-      box.classList.add("longscroll");
+    if (results.length == 0) {
+      hiddenHandler();
+      error.hidden = false;
     } else {
-      box.classList.remove("longscroll");
+      error.setAttribute("hidden", "");
+      box.hidden = false;
+      results.forEach((fruit) => {
+        let newFruit = document.createElement("li");
+        suggestions.appendChild(newFruit);
+        newFruit.innerText = fruit;
+      });
+      if (results.length > 7) {
+        box.classList.add("longscroll");
+      } else {
+        box.classList.remove("longscroll");
+      }
     }
   } else {
     box.classList.remove("longscroll");
+    hiddenHandler();
   }
 }
 
@@ -122,8 +132,20 @@ function useSuggestion(e) {
     input.value = e.target.innerText;
     suggestions.innerHTML = "";
     box.classList.remove("longscroll");
+    hiddenHandler();
   }
 }
 
-input.addEventListener("keyup", searchHandler);
-suggestions.addEventListener("click", useSuggestion);
+function hiddenHandler() {
+  box.setAttribute("hidden", "");
+}
+
+body.addEventListener("click", function (e) {
+  if (e.target.tagName === "BODY") {
+    hiddenHandler();
+  } else if (e.target.tagName === "LI") {
+    useSuggestion(e);
+  }
+});
+input.addEventListener("input", searchHandler);
+input.addEventListener("focus", searchHandler);
